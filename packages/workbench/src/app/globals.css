@@ -1,0 +1,146 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body {
+  background-color: #0a0a0a;
+  color: #ddd;
+  font-family: 'Inter', -apple-system, system-ui, sans-serif;
+  font-size: 12.5px;
+  -webkit-font-smoothing: antialiased;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #0a0a0a;
+}
+::-webkit-scrollbar-thumb {
+  background: #2a2a2a;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #3a3a3a;
+}
+
+@layer components {
+  .mono {
+    font-family: 'SF Mono', Menlo, Monaco, Consolas, monospace;
+  }
+
+  .label-tag {
+    @apply mono uppercase text-fg-faint text-[10px] tracking-widerlabel;
+  }
+
+  .section-header {
+    @apply mono uppercase text-fg-muted text-[10.5px] tracking-widelabel font-medium;
+  }
+
+  .panel {
+    @apply bg-bg-surface border border-border rounded-md;
+  }
+
+  .pill {
+    @apply mono text-[10.5px] px-2 py-[3px] rounded;
+  }
+}
+
+/* RJSF overrides — keep forms compact and dark-themed. */
+.rjsf .form-group {
+  margin-bottom: 14px;
+}
+
+.rjsf label {
+  display: block;
+  color: #aaa;
+  font-family: 'SF Mono', Menlo, monospace;
+  font-size: 11px;
+  margin-bottom: 4px;
+}
+
+.rjsf input[type='text'],
+.rjsf input[type='number'],
+.rjsf select,
+.rjsf textarea {
+  background: #141414;
+  border: 1px solid #2a2a2a;
+  color: #ddd;
+  padding: 5px 8px;
+  border-radius: 4px;
+  font-family: 'SF Mono', Menlo, monospace;
+  font-size: 11px;
+  width: 100%;
+}
+
+.rjsf input:focus,
+.rjsf select:focus {
+  outline: none;
+  border-color: #9ad;
+}
+
+.rjsf .field-description {
+  color: #555;
+  font-size: 10px;
+  font-style: italic;
+  margin-top: 3px;
+}
+
+.rjsf .control-label .required {
+  display: none;
+}
+
+.rjsf legend {
+  font-size: 11px;
+  color: #888;
+  font-family: 'SF Mono', Menlo, monospace;
+}
+
+.rjsf ul.error-detail {
+  color: #c74;
+  font-size: 10px;
+  padding-left: 16px;
+}
+
+.rjsf button.array-item-add,
+.rjsf button.array-item-remove,
+.rjsf button.array-item-move-up,
+.rjsf button.array-item-move-down {
+  background: #1c1c1c;
+  border: 1px solid #2a2a2a;
+  color: #aaa;
+  padding: 2px 8px;
+  font-size: 10px;
+  border-radius: 3px;
+  margin-right: 4px;
+  cursor: pointer;
+}
+
+.rjsf .checkbox label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #aaa;
+}
+
+.rjsf input[type='checkbox'] {
+  accent-color: #5a8;
+}
+
+.rjsf .panel.panel-danger,
+.rjsf .panel.errors {
+  background: #2a1818;
+  border: 1px solid #3a2828;
+  color: #c74;
+  padding: 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  margin-bottom: 12px;
+}
+
+.rjsf fieldset {
+  border: none;
+  padding: 0;
+}

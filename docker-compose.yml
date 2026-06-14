@@ -1,0 +1,47 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: docker/api.Dockerfile
+    container_name: sportsml-api
+    ports:
+      - "8000:8000"
+    environment:
+      SPORTSML_DATA_DIR: /app/data
+      SPORTSML_DUCKDB_PATH: /app/data/sportsml.duckdb
+      SPORTSML_TENANT_ID: demo
+      SPORTSML_DEFAULT_SPORT: basketball.nba
+    volumes:
+      - ./data:/app/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  workbench:
+    build:
+      context: .
+      dockerfile: docker/workbench.Dockerfile
+    container_name: sportsml-workbench
+    ports:
+      - "3000:3000"
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8000
+    depends_on:
+      - api
+
+  dagster:
+    build:
+      context: .
+      dockerfile: docker/dagster.Dockerfile
+    container_name: sportsml-dagster
+    ports:
+      - "3001:3001"
+    environment:
+      DAGSTER_HOME: /app/.dagster_home
+      SPORTSML_DATA_DIR: /app/data
+      SPORTSML_DUCKDB_PATH: /app/data/sportsml.duckdb
+    volumes:
+      - ./data:/app/data
+      - ./.dagster_home:/app/.dagster_home
