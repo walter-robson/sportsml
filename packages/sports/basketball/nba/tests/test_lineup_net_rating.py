@@ -43,8 +43,8 @@ def _synthetic_stints(seed: int = 7) -> pd.DataFrame:
     rows: list[dict[str, object]] = []
     # Three offensive 5-man groups for team T1; three opponents for T2.
     groups_off = [
-        ["p1", "p2", "p3", "p4", "p5"],     # strong
-        ["p6", "p7", "p8", "p9", "p10"],    # mid
+        ["p1", "p2", "p3", "p4", "p5"],  # strong
+        ["p6", "p7", "p8", "p9", "p10"],  # mid
         ["p11", "p12", "p13", "p14", "p15"],  # weak
     ]
     groups_def = [
@@ -58,18 +58,20 @@ def _synthetic_stints(seed: int = 7) -> pd.DataFrame:
             for k in range(50):  # 50 stints per pairing
                 noise = rng.normal(0, 2.0)
                 margin = true_off[off_idx] - true_off[def_idx] + noise
-                rows.append({
-                    "stint_id": f"s_{off_idx}_{def_idx}_{k}",
-                    "game_id": f"g_{off_idx}_{def_idx}",
-                    "off_team_id": "T1",
-                    "def_team_id": "T2",
-                    "off_player_ids": list(off_lu),
-                    "def_player_ids": list(def_lu),
-                    "possessions": 10,
-                    "points_for": int(round(margin / 10.0) + 5),
-                    "points_against": 5,
-                    "point_margin_per_100": margin,
-                })
+                rows.append(
+                    {
+                        "stint_id": f"s_{off_idx}_{def_idx}_{k}",
+                        "game_id": f"g_{off_idx}_{def_idx}",
+                        "off_team_id": "T1",
+                        "def_team_id": "T2",
+                        "off_player_ids": list(off_lu),
+                        "def_player_ids": list(def_lu),
+                        "possessions": 10,
+                        "points_for": int(round(margin / 10.0) + 5),
+                        "points_against": 5,
+                        "point_margin_per_100": margin,
+                    }
+                )
     return pd.DataFrame(rows)
 
 
@@ -87,8 +89,15 @@ def test_model_returns_expected_shape_and_deterministic_top_lineup():
         out = model.run(config, ctx)
     df = out.rows
     assert not df.empty, "Should return at least one scored lineup."
-    expected_cols = {"lineup_id", "team_id", "player_ids",
-                     "projected_net", "ci_lo", "ci_hi", "sample_n"}
+    expected_cols = {
+        "lineup_id",
+        "team_id",
+        "player_ids",
+        "projected_net",
+        "ci_lo",
+        "ci_hi",
+        "sample_n",
+    }
     assert expected_cols.issubset(df.columns)
     assert df.iloc[0]["projected_net"] > df.iloc[-1]["projected_net"]
     # The "strong" lineup is p1..p5.

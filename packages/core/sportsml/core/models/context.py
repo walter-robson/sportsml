@@ -69,8 +69,7 @@ class TenantContext:
         # with single-quote escaping.
         escaped_path = str(path).replace("'", "''")
         self.duckdb_conn.execute(
-            f"CREATE OR REPLACE VIEW {view_name} AS "
-            f"SELECT * FROM read_parquet('{escaped_path}')"
+            f"CREATE OR REPLACE VIEW {view_name} AS SELECT * FROM read_parquet('{escaped_path}')"
         )
         return view_name, len(df)
 

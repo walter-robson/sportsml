@@ -29,32 +29,74 @@ OUT_FILE = DATA_DIR / "features" / "nba" / "on_off_stints.parquet"
 ROSTERS: dict[str, dict[str, list[str]]] = {
     "1610612738": {  # BOS Celtics
         "name": "BOS",
-        "core": ["1628369", "1627759", "201950", "1628401", "204001"],  # Tatum/Brown/Holiday/White/Porzingis
-        "bench": ["1630202", "201143", "1630573", "1628378", "1629057"],  # Pritchard/Horford/Hauser/Kornet/Brissett
+        "core": [
+            "1628369",
+            "1627759",
+            "201950",
+            "1628401",
+            "204001",
+        ],  # Tatum/Brown/Holiday/White/Porzingis
+        "bench": [
+            "1630202",
+            "201143",
+            "1630573",
+            "1628378",
+            "1629057",
+        ],  # Pritchard/Horford/Hauser/Kornet/Brissett
     },
     "1610612744": {  # GSW Warriors
         "name": "GSW",
-        "core": ["201939", "2738", "203952", "203110", "1626172"],  # Curry/Thompson/Wiggins/Green/Looney
+        "core": [
+            "201939",
+            "2738",
+            "203952",
+            "203110",
+            "1626172",
+        ],  # Curry/Thompson/Wiggins/Green/Looney
         "bench": ["1628395", "1628384", "1630228", "1641706", "1630225"],
     },
     "1610612747": {  # LAL Lakers
         "name": "LAL",
-        "core": ["2544", "203076", "1627833", "1626156", "203497"],  # LeBron/AD/Reaves/D'Angelo Russell/Rui
+        "core": [
+            "2544",
+            "203076",
+            "1627833",
+            "1626156",
+            "203497",
+        ],  # LeBron/AD/Reaves/D'Angelo Russell/Rui
         "bench": ["1630559", "203944", "1630224", "1628401", "1629680"],
     },
     "1610612743": {  # DEN Nuggets
         "name": "DEN",
-        "core": ["203999", "1627750", "1628378", "1628960", "203914"],  # Jokic/Murray/MPJ/KCP/Aaron Gordon
+        "core": [
+            "203999",
+            "1627750",
+            "1628378",
+            "1628960",
+            "203914",
+        ],  # Jokic/Murray/MPJ/KCP/Aaron Gordon
         "bench": ["1630168", "1630174", "1629019", "1630268", "1629057"],
     },
     "1610612762": {  # OKC Thunder
         "name": "OKC",
-        "core": ["1628983", "1628973", "1629029", "1641705", "1630167"],  # SGA/Dort/Giddey/Holmgren/JDub
+        "core": [
+            "1628983",
+            "1628973",
+            "1629029",
+            "1641705",
+            "1630167",
+        ],  # SGA/Dort/Giddey/Holmgren/JDub
         "bench": ["1641709", "1630244", "1630238", "1628988", "1641710"],
     },
     "1610612749": {  # MIL Bucks
         "name": "MIL",
-        "core": ["203507", "201142", "1628978", "203114", "1629680"],  # Giannis/Dame/Brook Lopez/Khris/Beasley
+        "core": [
+            "203507",
+            "201142",
+            "1628978",
+            "203114",
+            "1629680",
+        ],  # Giannis/Dame/Brook Lopez/Khris/Beasley
         "bench": ["1630193", "1641754", "1630174", "204022", "203501"],
     },
 }
@@ -104,26 +146,23 @@ def _pick_lineup(rng: random.Random, roster: dict[str, list[str]]) -> list[str]:
     """Pick a 5-player lineup biased toward the core 5 with bench rotation."""
     n_core = rng.choices([5, 4, 3, 2], weights=[5, 3, 2, 1])[0]
     bench_count = 5 - n_core
-    return (
-        rng.sample(roster["core"], k=n_core)
-        + rng.sample(roster["bench"], k=bench_count)
-    )
+    return rng.sample(roster["core"], k=n_core) + rng.sample(roster["bench"], k=bench_count)
 
 
 # Latent player strengths. The RAPM model should approximately recover these
 # from the synthetic stints — that's how we know the demo loop is wired.
 LATENT_STRENGTHS: dict[str, float] = {
-    "1628369": 6.5,   # Tatum
-    "1627759": 4.8,   # Brown
-    "201950": 3.7,    # Holiday
-    "1628401": 2.1,   # White
-    "204001": 3.4,    # Porzingis
-    "201939": 7.2,    # Curry
-    "203507": 7.8,    # Giannis
-    "203999": 8.1,    # Jokic
-    "1628983": 6.9,   # SGA
-    "2544": 5.6,      # LeBron
-    "203076": 5.2,    # Davis
+    "1628369": 6.5,  # Tatum
+    "1627759": 4.8,  # Brown
+    "201950": 3.7,  # Holiday
+    "1628401": 2.1,  # White
+    "204001": 3.4,  # Porzingis
+    "201939": 7.2,  # Curry
+    "203507": 7.8,  # Giannis
+    "203999": 8.1,  # Jokic
+    "1628983": 6.9,  # SGA
+    "2544": 5.6,  # LeBron
+    "203076": 5.2,  # Davis
 }
 
 
@@ -140,7 +179,7 @@ def generate(season: str = "2023-24", n_games_per_pair: int = 4, rng_seed: int =
         for j, away in enumerate(team_ids):
             if i == j:
                 continue
-            for g in range(n_games_per_pair):
+            for _ in range(n_games_per_pair):
                 game_id = f"00223{game_counter:05d}"
                 game_counter += 1
                 home_quality_total = 0.0
@@ -151,14 +190,19 @@ def generate(season: str = "2023-24", n_games_per_pair: int = 4, rng_seed: int =
                     def_team = away if s % 2 == 0 else home
                     off_players = _pick_lineup(rng, ROSTERS[off_team])
                     def_players = _pick_lineup(rng, ROSTERS[def_team])
-                    quality_bias = (
-                        _lineup_quality(off_players) - _lineup_quality(def_players)
-                    )
+                    quality_bias = _lineup_quality(off_players) - _lineup_quality(def_players)
                     home_quality_total += quality_bias if off_team == home else -quality_bias
                     rows.append(
                         _make_stint_row(
-                            rng, game_id, s, off_team, def_team,
-                            off_players, def_players, season, quality_bias,
+                            rng,
+                            game_id,
+                            s,
+                            off_team,
+                            def_team,
+                            off_players,
+                            def_players,
+                            season,
+                            quality_bias,
                         )
                     )
     return pd.DataFrame(rows)
@@ -171,9 +215,9 @@ def main() -> None:
     print(f"Wrote {len(df):,} stints to {OUT_FILE}")
     print(f"  unique games: {df['game_id'].nunique()}")
     print(f"  unique teams: {df[['off_team_id']].nunique().iloc[0]}")
-    n_unique_off_lineups = (
-        df.assign(_l=df["off_player_ids"].map(lambda x: "|".join(sorted(x))))["_l"].nunique()
-    )
+    n_unique_off_lineups = df.assign(_l=df["off_player_ids"].map(lambda x: "|".join(sorted(x))))[
+        "_l"
+    ].nunique()
     print(f"  unique offensive lineups: {n_unique_off_lineups}")
 
 

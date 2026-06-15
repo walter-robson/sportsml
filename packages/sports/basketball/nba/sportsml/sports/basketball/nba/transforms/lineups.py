@@ -12,7 +12,9 @@ from sportsml.sports.basketball.nba.transforms.lineup_stints import nba_lineup_s
     compute_kind="duckdb",
     deps=[nba_lineup_stints],
 )
-def nba_lineups(context: AssetExecutionContext, nba_lineup_stints: "pd.DataFrame") -> Output[pd.DataFrame]:  # noqa: ARG001
+def nba_lineups(
+    context: AssetExecutionContext, nba_lineup_stints: "pd.DataFrame"
+) -> Output[pd.DataFrame]:  # noqa: ARG001
     """One row per unique (team_id, lineup_id) seen in stints."""
     import pandas as pd
 

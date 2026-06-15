@@ -44,26 +44,36 @@ class LineupNetRatingConfig(BaseModel):
         description="Training seasons to include.",
     )
     min_possessions: int = Field(
-        200, ge=50, le=2000,
+        200,
+        ge=50,
+        le=2000,
         description="Minimum possessions for a lineup to be returned in results.",
     )
     rapm_lambda: float = Field(
-        200.0, ge=10.0, le=2000.0,
+        200.0,
+        ge=10.0,
+        le=2000.0,
         description="Ridge regularization strength. Higher = more shrinkage to 0.",
     )
     prior_weight: float = Field(
-        0.5, ge=0.0, le=1.0,
+        0.5,
+        ge=0.0,
+        le=1.0,
         description="Blend toward team prior (0=pure data, 1=pure prior).",
     )
     three_point_emphasis: float = Field(
-        1.0, ge=0.5, le=3.0,
+        1.0,
+        ge=0.5,
+        le=3.0,
         description="Multiplier for 3-point heavy lineups in scoring.",
     )
     matchup_adjusted: bool = Field(
-        True, description="Include opponent strength when projecting net rating.",
+        True,
+        description="Include opponent strength when projecting net rating.",
     )
     position_constraints: bool = Field(
-        False, description="Enforce 1xPG + ≥1xbig in returned projections.",
+        False,
+        description="Enforce 1xPG + ≥1xbig in returned projections.",
     )
 
 
@@ -136,10 +146,16 @@ def _score_lineups(
     by_lineup: dict[tuple[str, tuple[str, ...]], dict[str, object]] = {}
     for _, r in stints.iterrows():
         key = (str(r["off_team_id"]), tuple(sorted(str(p) for p in r["off_player_ids"])))
-        b = by_lineup.setdefault(key, {
-            "team_id": key[0], "player_ids": list(key[1]),
-            "possessions": 0, "points_for": 0, "points_against": 0,
-        })
+        b = by_lineup.setdefault(
+            key,
+            {
+                "team_id": key[0],
+                "player_ids": list(key[1]),
+                "possessions": 0,
+                "points_for": 0,
+                "points_against": 0,
+            },
+        )
         b["possessions"] += int(r["possessions"])
         b["points_for"] += int(r["points_for"])
         b["points_against"] += int(r["points_against"])
@@ -158,15 +174,17 @@ def _score_lineups(
         # we widen by sqrt(5) since 5 independent coefs are summed.
         n_poss = int(agg["possessions"])
         sigma = float(np.sqrt(residual_var * 5.0 / max(n_poss, 1)))
-        rows.append({
-            "lineup_id": _hash_lineup(players),
-            "team_id": agg["team_id"],
-            "player_ids": list(players),
-            "projected_net": round(net, 3),
-            "ci_lo": round(net - z * sigma, 3),
-            "ci_hi": round(net + z * sigma, 3),
-            "sample_n": n_poss,
-        })
+        rows.append(
+            {
+                "lineup_id": _hash_lineup(players),
+                "team_id": agg["team_id"],
+                "player_ids": list(players),
+                "projected_net": round(net, 3),
+                "ci_lo": round(net - z * sigma, 3),
+                "ci_hi": round(net + z * sigma, 3),
+                "sample_n": n_poss,
+            }
+        )
 
     df = pd.DataFrame(rows)
     if not df.empty:
@@ -217,22 +235,21 @@ class LineupNetRatingModel(ModelTemplate):
 
     def run(self, config: BaseModel, ctx: TenantContext) -> ModelRunOutput:
         if not isinstance(config, LineupNetRatingConfig):
-            raise TypeError(
-                f"Expected LineupNetRatingConfig, got {type(config).__name__}."
-            )
+            raise TypeError(f"Expected LineupNetRatingConfig, got {type(config).__name__}.")
         stints = self._load_stints(ctx, config.seasons)
         if stints.empty:
             import pandas as pd
+
             return ModelRunOutput(rows=pd.DataFrame(), metadata={"reason": "no_data"})
 
         players, p_to_col = _player_index(stints)
         X, y, w = _build_design_matrix(stints, p_to_col)  # noqa: N806 — sklearn convention
-        sample_weight = w ** 2  # Ridge takes weights, not sqrt(weights).
+        sample_weight = w**2  # Ridge takes weights, not sqrt(weights).
         ridge = Ridge(alpha=config.rapm_lambda, fit_intercept=False)
         ridge.fit(X, y, sample_weight=sample_weight)
         coefs = ridge.coef_
         residuals = y - X @ coefs
-        residual_var = float(np.average(residuals ** 2, weights=sample_weight) + 1e-6)
+        residual_var = float(np.average(residuals**2, weights=sample_weight) + 1e-6)
 
         df = _score_lineups(stints, coefs, p_to_col, residual_var, config.min_possessions)
         # TODO(v0.5): wire prior_weight, three_point_emphasis, matchup_adjusted,

@@ -39,9 +39,16 @@ def segment_possessions(pbp: "pd.DataFrame") -> "pd.DataFrame":
     if pbp.empty:
         return pd.DataFrame(
             columns=[
-                "id", "game_id", "possession_num", "period", "outcome",
-                "points_scored", "offense_team_id", "defense_team_id",
-                "game_clock_start", "game_clock_end",
+                "id",
+                "game_id",
+                "possession_num",
+                "period",
+                "outcome",
+                "points_scored",
+                "offense_team_id",
+                "defense_team_id",
+                "game_clock_start",
+                "game_clock_end",
             ]
         )
 
@@ -67,18 +74,20 @@ def segment_possessions(pbp: "pd.DataFrame") -> "pd.DataFrame":
             if offense_team is None:
                 return
             possession_num += 1
-            out_rows.append({
-                "id": f"{current_game}_{possession_num}",
-                "game_id": str(current_game),
-                "possession_num": possession_num,
-                "period": current_period,
-                "outcome": outcome,
-                "points_scored": points,
-                "offense_team_id": str(offense_team),
-                "defense_team_id": "",
-                "game_clock_start": clock_start or "",
-                "game_clock_end": end_clock,
-            })
+            out_rows.append(
+                {
+                    "id": f"{current_game}_{possession_num}",
+                    "game_id": str(current_game),
+                    "possession_num": possession_num,
+                    "period": current_period,
+                    "outcome": outcome,
+                    "points_scored": points,
+                    "offense_team_id": str(offense_team),
+                    "defense_team_id": "",
+                    "game_clock_start": clock_start or "",
+                    "game_clock_end": end_clock,
+                }
+            )
             offense_team = None
             clock_start = None
             points = 0
@@ -120,9 +129,16 @@ def segment_possessions(pbp: "pd.DataFrame") -> "pd.DataFrame":
             flush("00:00", "end_period", str(game_id), period_now)
 
     cols = [
-        "id", "game_id", "possession_num", "period", "outcome",
-        "points_scored", "offense_team_id", "defense_team_id",
-        "game_clock_start", "game_clock_end",
+        "id",
+        "game_id",
+        "possession_num",
+        "period",
+        "outcome",
+        "points_scored",
+        "offense_team_id",
+        "defense_team_id",
+        "game_clock_start",
+        "game_clock_end",
     ]
     return pd.DataFrame(out_rows, columns=cols)
 
@@ -141,6 +157,7 @@ def nba_possessions(context: AssetExecutionContext) -> Output[pd.DataFrame]:
     pbp = cache.load_cached("raw_nba_pbp", context.partition_key)
     if pbp is None or pbp.empty:
         import pandas as pd
+
         df = pd.DataFrame()
     else:
         df = segment_possessions(pbp)

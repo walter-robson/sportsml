@@ -13,6 +13,19 @@ venv/
 dist/
 build/
 
+## Coverage
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+
+## Pre-commit
+.pre-commit-cache/
+
+## Next.js build artifacts (in addition to .next/)
+tsconfig.tsbuildinfo
+**/tsconfig.tsbuildinfo
+
 ## Node
 node_modules/
 .next/

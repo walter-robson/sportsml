@@ -78,9 +78,7 @@ def box_score(game_id: str) -> pd.DataFrame:
 
     _throttle()
     cfg = ingestion_config()
-    resp = boxscoretraditionalv2.BoxScoreTraditionalV2(
-        game_id=game_id, timeout=cfg.api_timeout
-    )
+    resp = boxscoretraditionalv2.BoxScoreTraditionalV2(game_id=game_id, timeout=cfg.api_timeout)
     return resp.get_data_frames()[0]
 
 

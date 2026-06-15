@@ -35,6 +35,7 @@ def create_app() -> FastAPI:
     # Allow Workbench dev server on either 3000 (default) or 3001 (fallback when 3000 is in use).
     # Configurable via SPORTSML_CORS_ORIGINS (comma-separated) for non-default ports.
     import os
+
     cors_origins = os.environ.get(
         "SPORTSML_CORS_ORIGINS",
         "http://localhost:3000,http://localhost:3001",

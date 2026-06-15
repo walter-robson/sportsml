@@ -64,8 +64,10 @@ def raw_nba_pbp(context: AssetExecutionContext) -> Output[pd.DataFrame]:
     if games is None:
         raise RuntimeError("raw_nba_games not yet materialized.")
     game_ids = sorted(games["GAME_ID"].astype(str).unique())[:SMOKE_GAME_LIMIT]
-    frames = [_cached_or_fetch("raw_nba_pbp", gid, lambda gid=gid: client.play_by_play(gid))
-              for gid in game_ids]
+    frames = [
+        _cached_or_fetch("raw_nba_pbp", gid, lambda gid=gid: client.play_by_play(gid))
+        for gid in game_ids
+    ]
     df = pd.concat(frames, ignore_index=True) if frames else pd.DataFrame()
     return Output(df, metadata={"rows": len(df), "games": len(game_ids)})
 
@@ -84,8 +86,10 @@ def raw_nba_box_scores(context: AssetExecutionContext) -> Output[pd.DataFrame]:
     if games is None:
         raise RuntimeError("raw_nba_games not yet materialized.")
     game_ids = sorted(games["GAME_ID"].astype(str).unique())[:SMOKE_GAME_LIMIT]
-    frames = [_cached_or_fetch("raw_nba_box_scores", gid, lambda gid=gid: client.box_score(gid))
-              for gid in game_ids]
+    frames = [
+        _cached_or_fetch("raw_nba_box_scores", gid, lambda gid=gid: client.box_score(gid))
+        for gid in game_ids
+    ]
     df = pd.concat(frames, ignore_index=True) if frames else pd.DataFrame()
     return Output(df, metadata={"rows": len(df), "games": len(game_ids)})
 
@@ -127,9 +131,11 @@ def raw_nba_team_roster(context: AssetExecutionContext) -> Output[pd.DataFrame]:
     frames = []
     for tid in teams["id"].astype(int).tolist():
         key = f"{tid}_{season}"
-        frames.append(_cached_or_fetch(
-            "raw_nba_team_roster", key, lambda tid=tid: client.team_roster(tid, season)
-        ))
+        frames.append(
+            _cached_or_fetch(
+                "raw_nba_team_roster", key, lambda tid=tid: client.team_roster(tid, season)
+            )
+        )
     df = pd.concat(frames, ignore_index=True) if frames else pd.DataFrame()
     return Output(df, metadata={"rows": len(df)})
 
@@ -151,9 +157,11 @@ def raw_nba_shot_chart(context: AssetExecutionContext) -> Output[pd.DataFrame]:
     frames = []
     for tid in teams["id"].astype(int).tolist():
         key = f"{tid}_{season}"
-        frames.append(_cached_or_fetch(
-            "raw_nba_shot_chart", key, lambda tid=tid: client.shot_chart(tid, season)
-        ))
+        frames.append(
+            _cached_or_fetch(
+                "raw_nba_shot_chart", key, lambda tid=tid: client.shot_chart(tid, season)
+            )
+        )
     df = pd.concat(frames, ignore_index=True) if frames else pd.DataFrame()
     return Output(df, metadata={"rows": len(df)})
 

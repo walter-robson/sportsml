@@ -33,6 +33,7 @@ class FakeModel(ModelTemplate):
 
     def run(self, config, ctx):  # noqa: ANN001, D401
         import pandas as pd
+
         return ModelRunOutput(rows=pd.DataFrame([{"score": config.threshold}]))
 
 
