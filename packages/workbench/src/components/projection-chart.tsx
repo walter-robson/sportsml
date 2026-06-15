@@ -1,4 +1,4 @@
-import type { LineupRow } from '@/lib/types';
+import type { LineupRow } from "@/lib/types";
 
 type Props = {
   rows: ReadonlyArray<LineupRow>;
@@ -33,7 +33,7 @@ export function ProjectionChart({ rows }: Props) {
         <line x1={0} y1={baselineY} x2={VB_W} y2={baselineY} stroke="#1f1f1f" />
         {sorted.map((row, i) => {
           const cx = PAD_X + colWidth * (i + 0.5);
-          const obsColor = row.observed_net >= 0 ? '#5a8' : '#c74';
+          const obsColor = row.observed_net >= 0 ? "#5a8" : "#c74";
           return (
             <g key={row.lineup_id}>
               <line
@@ -51,17 +51,30 @@ export function ProjectionChart({ rows }: Props) {
         <text x={PAD_X} y={VB_H - 4} fill="#666" fontSize={9} className="mono">
           high sample
         </text>
-        <text x={VB_W - PAD_X} y={VB_H - 4} fill="#666" fontSize={9} textAnchor="end" className="mono">
+        <text
+          x={VB_W - PAD_X}
+          y={VB_H - 4}
+          fill="#666"
+          fontSize={9}
+          textAnchor="end"
+          className="mono"
+        >
           low sample
         </text>
       </svg>
       <div className="flex gap-4 text-[10px] text-fg-faint mono">
         <span>
-          <span className="inline-block w-2 h-2 align-middle mr-1.5" style={{ background: '#5a8' }} />
+          <span
+            className="inline-block w-2 h-2 align-middle mr-1.5"
+            style={{ background: "#5a8" }}
+          />
           observed net (raw)
         </span>
         <span>
-          <span className="inline-block w-2 h-2 rounded-full align-middle mr-1.5" style={{ background: '#9ad' }} />
+          <span
+            className="inline-block w-2 h-2 rounded-full align-middle mr-1.5"
+            style={{ background: "#9ad" }}
+          />
           model projection (shrunk)
         </span>
       </div>

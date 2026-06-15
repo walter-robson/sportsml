@@ -1,6 +1,6 @@
-import { listDatasets } from '@/lib/api';
-import { Table, THead, TBody, TR, TH, TD } from '@/components/ui/table';
-import { formatNumber, formatRelative } from '@/lib/utils';
+import { listDatasets } from "@/lib/api";
+import { Table, THead, TBody, TR, TH, TD } from "@/components/ui/table";
+import { formatNumber, formatRelative } from "@/lib/utils";
 
 export default async function DatasetsPage() {
   const datasets = await listDatasets();

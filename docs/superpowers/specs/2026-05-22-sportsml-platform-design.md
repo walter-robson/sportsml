@@ -14,16 +14,16 @@ POC focuses on the NBA. Architecture is sport-agnostic from day one to preserve 
 
 ## 1. Constraints & Decisions
 
-| Decision | Choice | Rationale |
-|---|---|---|
-| Data scope | 5 NBA seasons (2019-20 → 2023-24) + current NCAA D1 season | Min depth for credible RAPM + prospect translation training |
-| Data sources | API-only; no scrapes | `nba_api` (stats.nba.com), CollegeBasketballData.com API |
-| Deployment model | Multi-tenant architecture, single-tenant POC deploy | Lets us claim both deployment stories; doesn't force BYOC work yet |
-| Modeling UX | Templates + auto-generated slider UI (path to full SDK later) | Non-technical first wave; technical staff later |
-| Tech stack | Python + FastAPI + DuckDB → MotherDuck + Supabase (Postgres) + Next.js/TS + shadcn/ui + Dagster | DuckDB for analytics, Supabase for app state, Dagster for canonical data |
-| Architectural style | Foundry-faithful backbone, Palantir-flavored UI vocabulary | "Data product by nerds"; no sport-themed cute names |
-| Sport-pluggable abstraction | First-class from day one | ~10% structural cost now, pays back at sport #2 |
-| Transaction Modeling | **Cut from POC** | No free contracts API; revisit once paid feed integrated |
+| Decision                    | Choice                                                                                          | Rationale                                                                |
+| --------------------------- | ----------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| Data scope                  | 5 NBA seasons (2019-20 → 2023-24) + current NCAA D1 season                                      | Min depth for credible RAPM + prospect translation training              |
+| Data sources                | API-only; no scrapes                                                                            | `nba_api` (stats.nba.com), CollegeBasketballData.com API                 |
+| Deployment model            | Multi-tenant architecture, single-tenant POC deploy                                             | Lets us claim both deployment stories; doesn't force BYOC work yet       |
+| Modeling UX                 | Templates + auto-generated slider UI (path to full SDK later)                                   | Non-technical first wave; technical staff later                          |
+| Tech stack                  | Python + FastAPI + DuckDB → MotherDuck + Supabase (Postgres) + Next.js/TS + shadcn/ui + Dagster | DuckDB for analytics, Supabase for app state, Dagster for canonical data |
+| Architectural style         | Foundry-faithful backbone, Palantir-flavored UI vocabulary                                      | "Data product by nerds"; no sport-themed cute names                      |
+| Sport-pluggable abstraction | First-class from day one                                                                        | ~10% structural cost now, pays back at sport #2                          |
+| Transaction Modeling        | **Cut from POC**                                                                                | No free contracts API; revisit once paid feed integrated                 |
 
 ## 2. Architecture (6 layers)
 
@@ -47,6 +47,7 @@ POC focuses on the NBA. Architecture is sport-agnostic from day one to preserve 
 ```
 
 Cross-cutting on every row, every API call, every model config:
+
 - `tenant_id` — multi-tenancy (RLS in Postgres; per-tenant DuckDB schemas)
 - `sport_id` — sport-pluggable dimension (`basketball.nba`, `basketball.ncaa`, ...)
 
@@ -75,6 +76,7 @@ Sport-specific vocabulary appears only inside data (Object Type names like `Poss
 FastAPI, Python 3.12. Pydantic schemas mirror Ontology types. Every request carries a tenant-scoped JWT (issued by Supabase Auth). OpenAPI spec drives auto-generated TypeScript client for the Workbench.
 
 Endpoints:
+
 - `GET /ontology/types` — list Object Types for current sport
 - `GET /ontology/{type}/{id}` — fetch instance + links
 - `GET /datasets` — list materialized assets with freshness
@@ -101,6 +103,7 @@ sportsml/core/
 ### 2.4 Sport Plugins (Layer 4)
 
 Each sport plugin is a self-contained Python package that exports:
+
 - Object Types (extending `core.ontology` base classes)
 - Dagster `Definitions` (its assets, partitions, IO managers)
 - Pydantic config schemas
@@ -108,10 +111,12 @@ Each sport plugin is a self-contained Python package that exports:
 - `App` subclasses (AppSpecs)
 
 POC builds out fully:
+
 - `sportsml.sports.basketball.nba`
 - `sportsml.sports.basketball.ncaa` (subset — only what prospect translation needs)
 
 Stubs (interface declared, implementation empty):
+
 - `sportsml.sports.basketball.euroleague`
 - `sportsml.sports.football.nfl`
 - `sportsml.sports.baseball.mlb`
@@ -122,11 +127,13 @@ Stubs (interface declared, implementation empty):
 Two databases, one direction of sync.
 
 **DuckDB (→ MotherDuck for cloud / multi-tenant)** — analytics workload.
+
 - Hive-partitioned Parquet files on disk
 - DuckDB views register the Parquet trees as queryable tables
 - Same code runs against embedded DuckDB in dev and MotherDuck in cloud
 
 Directory layout:
+
 ```
 data/
   core/
@@ -149,6 +156,7 @@ data/
 ```
 
 **Supabase / Postgres** — application state. RLS-enforced tenant isolation.
+
 - `tenants`, `users` (extends `auth.users`)
 - `model_configs` (user-saved configs, content-hashed)
 - `model_runs` (run_id, config_hash, started_at, status, duration_s, row_count, output_dataset)
@@ -156,6 +164,7 @@ data/
 - `audit_log`
 
 Tenant model:
+
 - Canonical public data lives in DuckDB without `tenant_id` (shared across all tenants — it's the same NBA data)
 - Per-tenant data: model configs in Postgres; model run outputs in DuckDB under `tenant_{id}.<dataset>` schemas
 - RLS policy on every Postgres table: `tenant_id = auth.jwt()->>'tenant_id'`
@@ -165,6 +174,7 @@ Tenant model:
 All ingestion + ontology + feature transforms are Dagster assets. Dagit is the internal admin/debug UI; not surfaced to Workbench users in the POC.
 
 Source assets (API-only):
+
 - `nba_api`: PBP, box scores, shot charts, team rosters, draft data
 - `CollegeBasketballData`: NCAA D1 player & team season stats
 
@@ -176,33 +186,33 @@ Each sport plugin contributes a Dagster code location loaded into one Definition
 
 ### 3.1 Core (sport-agnostic)
 
-| ObjectType | Key properties | Notes |
-|---|---|---|
-| `League` | id, sport_id, name, country, level | e.g., NBA, NCAA-D1 |
-| `Season` | id, league_id, name, start_date, end_date | |
-| `Team` | id, league_id, name, abbreviation, city | |
-| `Player` | id, sport_id, full_name, birth_date, height_cm, weight_kg, position | `position` is a free-form string; convention is sport-specific (NBA: PG/SG/SF/PF/C; NFL: QB/RB/WR/...). No schema change to add a sport. |
-| `Game` | id, season_id, date, home_team_id, away_team_id, home_score, away_score | |
-| `PlayerGame` | player_id, game_id, minutes, plus_minus | Minimal core columns; sport plugins add columns via plugin-owned sibling tables (e.g., `basketball.nba.player_game_box`) joined on `(player_id, game_id)`. Core remains stable; plugin owns its stats. |
+| ObjectType   | Key properties                                                          | Notes                                                                                                                                                                                                  |
+| ------------ | ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `League`     | id, sport_id, name, country, level                                      | e.g., NBA, NCAA-D1                                                                                                                                                                                     |
+| `Season`     | id, league_id, name, start_date, end_date                               |                                                                                                                                                                                                        |
+| `Team`       | id, league_id, name, abbreviation, city                                 |                                                                                                                                                                                                        |
+| `Player`     | id, sport_id, full_name, birth_date, height_cm, weight_kg, position     | `position` is a free-form string; convention is sport-specific (NBA: PG/SG/SF/PF/C; NFL: QB/RB/WR/...). No schema change to add a sport.                                                               |
+| `Game`       | id, season_id, date, home_team_id, away_team_id, home_score, away_score |                                                                                                                                                                                                        |
+| `PlayerGame` | player_id, game_id, minutes, plus_minus                                 | Minimal core columns; sport plugins add columns via plugin-owned sibling tables (e.g., `basketball.nba.player_game_box`) joined on `(player_id, game_id)`. Core remains stable; plugin owns its stats. |
 
 ### 3.2 Basketball NBA extensions
 
-| ObjectType | Key properties |
-|---|---|
-| `Possession` (extends Event) | game_id, period, game_clock, offense_team_id, defense_team_id, outcome, points_scored, possession_seconds |
-| `Shot` (extends Event) | possession_id, shooter_id, x, y, distance_ft, shot_type, made, shot_value, assisted_by_id |
-| `Lineup` | team_id, player_ids[5] (canonical sorted hash) |
-| `LineupStint` | game_id, lineup_id, start_time, end_time, possessions_played, points_for, points_against |
-| `Substitution` (extends Event) | game_id, period, game_clock, player_in_id, player_out_id |
-| `DraftProspect` | player_id, draft_year, last_league_id, last_team_id, mock_position?, scout_grade? | `mock_position` / `scout_grade` are optional, nullable; populated from tenant-owned seed data when available, not ingested from public APIs |
+| ObjectType                     | Key properties                                                                                            |
+| ------------------------------ | --------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Possession` (extends Event)   | game_id, period, game_clock, offense_team_id, defense_team_id, outcome, points_scored, possession_seconds |
+| `Shot` (extends Event)         | possession_id, shooter_id, x, y, distance_ft, shot_type, made, shot_value, assisted_by_id                 |
+| `Lineup`                       | team_id, player_ids[5] (canonical sorted hash)                                                            |
+| `LineupStint`                  | game_id, lineup_id, start_time, end_time, possessions_played, points_for, points_against                  |
+| `Substitution` (extends Event) | game_id, period, game_clock, player_in_id, player_out_id                                                  |
+| `DraftProspect`                | player_id, draft_year, last_league_id, last_team_id, mock_position?, scout_grade?                         | `mock_position` / `scout_grade` are optional, nullable; populated from tenant-owned seed data when available, not ingested from public APIs |
 
 ### 3.3 Basketball NCAA extensions
 
-| ObjectType | Key properties |
-|---|---|
-| `NCAAGame` (extends Game) | + conference_id, neutral_site, tournament_id |
-| `NCAAPlayerSeason` | player_id, season_id, team_id, gp, mpg, usage, ts%, ast%, trb%, stl%, blk% (and more) |
-| `NCAATeamSeason` | team_id, season_id, conference, schedule_strength, kenpom_adjO?, kenpom_adjD? |
+| ObjectType                | Key properties                                                                        |
+| ------------------------- | ------------------------------------------------------------------------------------- |
+| `NCAAGame` (extends Game) | + conference_id, neutral_site, tournament_id                                          |
+| `NCAAPlayerSeason`        | player_id, season_id, team_id, gp, mpg, usage, ts%, ast%, trb%, stl%, blk% (and more) |
+| `NCAATeamSeason`          | team_id, season_id, conference, schedule_strength, kenpom_adjO?, kenpom_adjD?         |
 
 ### 3.4 Links (relationships)
 
@@ -284,14 +294,14 @@ class ModelTemplate(ABC):
 
 Pydantic field annotations map directly to UI controls. Frontend uses `@rjsf/core` with a custom shadcn theme. Adding a knob = adding a Pydantic `Field`; zero frontend code.
 
-| Pydantic | UI control |
-|---|---|
-| `int` + `ge` + `le` | range slider |
+| Pydantic              | UI control                 |
+| --------------------- | -------------------------- |
+| `int` + `ge` + `le`   | range slider               |
 | `float` + `ge` + `le` | range slider with decimals |
-| `bool` | toggle |
-| `list[str]` + enum | multi-select |
-| `Literal[...]` | segmented control |
-| `description=` | helper tooltip |
+| `bool`                | toggle                     |
+| `list[str]` + enum    | multi-select               |
+| `Literal[...]`        | segmented control          |
+| `description=`        | helper tooltip             |
 
 ### 5.3 Models shipped in POC
 
@@ -300,6 +310,7 @@ Pydantic field annotations map directly to UI controls. Frontend uses `@rjsf/cor
 Bayesian-shrunk RAPM with matchup adjustment. Scores every observed 5-man lineup, projects unseen ones, returns confidence bands.
 
 Tunable knobs (Pydantic config):
+
 - `seasons: list[str]` — training seasons
 - `min_possessions: int` (50–2000, default 200)
 - `rapm_lambda: float` (10–2000, default 200) — L2 regularization strength
@@ -315,6 +326,7 @@ Output schema: `(lineup_id, projected_net, ci_lo, ci_hi, sample_n)`.
 NCAA per-40 → projected NBA per-36 stats with confidence bands. Trained on historical draft cohorts via `nba_api` draft history.
 
 Tunable knobs:
+
 - `training_cohorts: list[int]` — which draft years to learn translation factors from
 - `age_curve: Literal["young", "standard", "aggressive"]`
 - `strength_of_schedule_weight: float` (0–1, default 0.5)
@@ -338,6 +350,7 @@ GET /models/lineup_net_rating/runs/{run_id}/output?limit=100&sort=-projected_net
 ```
 
 Properties:
+
 - Config validated server-side against schema before run queued
 - Run record persisted in Postgres (run_id, config_hash, status, duration, output pointer)
 - Output rows persisted in DuckDB under `tenant_{id}.<model_name>`
@@ -364,6 +377,7 @@ Each sport plugin exports its Apps. Workbench shell is generic — it renders wh
 #### Lineup Analysis (hero, polished)
 
 Left config panel (auto-generated sliders for `LineupNetRatingConfig`) + tabbed result area:
+
 - Top Lineups table (sorted by projected net rating, with sample sizes and CIs)
 - 2-Man Synergy heatmap
 - Projection vs Observed chart (shrinkage made visible)
@@ -374,6 +388,7 @@ Demo moment: drag `three_point_emphasis` from 1.0 → 2.0, click Run, table re-s
 #### Prospect Translation (functional)
 
 Left config panel (auto-generated sliders for `ProspectTranslationConfig`) + result area:
+
 - Current draft class table with projected NBA per-36 lines
 - Per-prospect detail panel with comparables and CI bands
 - "What if" toggle to re-project with different config
@@ -457,24 +472,24 @@ Hero (Lineup Analysis) and core data plumbing are never cut.
 
 ## 11. Risks & Mitigations
 
-| Risk | Mitigation |
-|---|---|
-| `nba_api` rate limiting | Backoff + cache all responses to local Parquet; one-time backfill, not live |
+| Risk                                 | Mitigation                                                                                             |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------ |
+| `nba_api` rate limiting              | Backoff + cache all responses to local Parquet; one-time backfill, not live                            |
 | Possession / lineup-stint edge cases | Lean on `pbpstats` library; ship golden-record tests covering OT, technical FTs, jump balls, ejections |
-| RAPM compute on laptop | DuckDB-built design matrix + `scipy.sparse` regression; budget <30s per run on 270K rows |
-| NCAA data quality / coverage | CollegeBasketballData API as primary; document fallback to manual seed file if API rate-limited |
-| Auto-generated forms feeling generic | Custom slider + result panel polish for hero; secondary apps get RJSF defaults |
-| Sport-pluggable abstraction overhead | Accept ~10% structural cost upfront; pays back at sport #2 |
+| RAPM compute on laptop               | DuckDB-built design matrix + `scipy.sparse` regression; budget <30s per run on 270K rows               |
+| NCAA data quality / coverage         | CollegeBasketballData API as primary; document fallback to manual seed file if API rate-limited        |
+| Auto-generated forms feeling generic | Custom slider + result panel polish for hero; secondary apps get RJSF defaults                         |
+| Sport-pluggable abstraction overhead | Accept ~10% structural cost upfront; pays back at sport #2                                             |
 
 ## 12. Phasing (rough — solo builder)
 
-| Phase | Scope | Duration |
-|---|---|---|
-| 1 | Data foundation — repo scaffold, Dagster project, NBA + NCAA ingestion adapters, raw → ontology transforms | ~2 wk |
-| 2 | Features + Model framework — feature transforms, ModelTemplate base, `lineup_net_rating` with shrinkage RAPM | ~2 wk |
-| 3 | API + Workbench shell — FastAPI service, Supabase auth, Next.js shell, Ontology/Datasets/Models pages | ~1.5 wk |
-| 4 | Apps — Lineup Analysis hero (full polish), Prospect Translation (functional) | ~1.5 wk |
-| 5 | Polish + demo — bug fixes, demo flow scripting, recorded walkthrough, README + setup docs | ~0.5 wk |
+| Phase | Scope                                                                                                        | Duration |
+| ----- | ------------------------------------------------------------------------------------------------------------ | -------- |
+| 1     | Data foundation — repo scaffold, Dagster project, NBA + NCAA ingestion adapters, raw → ontology transforms   | ~2 wk    |
+| 2     | Features + Model framework — feature transforms, ModelTemplate base, `lineup_net_rating` with shrinkage RAPM | ~2 wk    |
+| 3     | API + Workbench shell — FastAPI service, Supabase auth, Next.js shell, Ontology/Datasets/Models pages        | ~1.5 wk  |
+| 4     | Apps — Lineup Analysis hero (full polish), Prospect Translation (functional)                                 | ~1.5 wk  |
+| 5     | Polish + demo — bug fixes, demo flow scripting, recorded walkthrough, README + setup docs                    | ~0.5 wk  |
 
 Total: roughly **7 weeks** of focused work for a solo builder. Phases 2-4 have parallel-able components.
 

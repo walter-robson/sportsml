@@ -11,8 +11,8 @@ import {
   mockListModels,
   mockListOntologyTypes,
   mockSubmitRun,
-} from './api-mock';
-import { nameFor } from './player-names';
+} from "./api-mock";
+import { nameFor } from "./player-names";
 import type {
   AppDescriptor,
   Dataset,
@@ -27,7 +27,7 @@ import type {
   RunSubmitResponse,
   SynergyCell,
   SynergyMatrix,
-} from './types';
+} from "./types";
 
 // --- Backend row/response shapes -------------------------------------------
 // The FastAPI service returns slightly different shapes than the components
@@ -69,18 +69,18 @@ type BackendRunDetail = BackendSubmitResponse & {
 
 function mapStatus(s: string): RunStatus {
   switch (s) {
-    case 'succeeded':
-    case 'success':
-    case 'cached':
-      return 'success';
-    case 'failed':
-    case 'error':
-      return 'failed';
-    case 'queued':
-      return 'queued';
-    case 'running':
+    case "succeeded":
+    case "success":
+    case "cached":
+      return "success";
+    case "failed":
+    case "error":
+      return "failed";
+    case "queued":
+      return "queued";
+    case "running":
     default:
-      return 'running';
+      return "running";
   }
 }
 
@@ -93,9 +93,7 @@ function mapStatus(s: string): RunStatus {
 // have visibly larger gaps — which is exactly the shrinkage story we want
 // rendered.
 function approximateObserved(row: BackendLineupRow): number {
-  const noiseSeed = row.lineup_id
-    .split('')
-    .reduce((acc, c) => ((acc * 31 + c.charCodeAt(0)) | 0), 0);
+  const noiseSeed = row.lineup_id.split("").reduce((acc, c) => (acc * 31 + c.charCodeAt(0)) | 0, 0);
   const normalized = ((noiseSeed >>> 0) % 1000) / 1000.0 - 0.5; // -0.5..0.5
   const scale = 8 / Math.sqrt(Math.max(row.sample_n, 1));
   return Number((row.projected_net + normalized * scale * 6).toFixed(2));
@@ -162,17 +160,17 @@ function toRunOutput(backend: BackendRunOutput): RunOutput {
   return { rows, synergy: deriveSynergyMatrix(rows) };
 }
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000';
-const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK === 'true';
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK === "true";
 
 async function fetchJson<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${API_URL}${path}`, {
     ...init,
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
       ...(init?.headers ?? {}),
     },
-    cache: 'no-store',
+    cache: "no-store",
   });
   if (!res.ok) {
     throw new Error(`API ${path} → ${res.status}`);
@@ -209,11 +207,11 @@ type BackendApp = {
 
 export async function listOntologyTypes(): Promise<ReadonlyArray<ObjectType>> {
   if (USE_MOCK) return mockListOntologyTypes();
-  const resp = await fetchJson<{ types: ReadonlyArray<BackendOntologyType> }>('/ontology/types');
+  const resp = await fetchJson<{ types: ReadonlyArray<BackendOntologyType> }>("/ontology/types");
   return resp.types.map((t) => {
     const tn = t.type_name;
-    const sportId = tn.startsWith('core.') ? 'core' : tn.split('.').slice(0, -1).join('.');
-    const leaf = tn.split('.').slice(-1)[0] ?? tn;
+    const sportId = tn.startsWith("core.") ? "core" : tn.split(".").slice(0, -1).join(".");
+    const leaf = tn.split(".").slice(-1)[0] ?? tn;
     return {
       id: tn,
       name: leaf.charAt(0).toUpperCase() + leaf.slice(1),
@@ -225,7 +223,7 @@ export async function listOntologyTypes(): Promise<ReadonlyArray<ObjectType>> {
 
 export async function listDatasets(): Promise<ReadonlyArray<Dataset>> {
   if (USE_MOCK) return mockListDatasets();
-  const resp = await fetchJson<{ datasets: ReadonlyArray<BackendDataset> }>('/datasets');
+  const resp = await fetchJson<{ datasets: ReadonlyArray<BackendDataset> }>("/datasets");
   return resp.datasets.map((d) => ({
     id: d.id,
     name: d.name,
@@ -236,13 +234,14 @@ export async function listDatasets(): Promise<ReadonlyArray<Dataset>> {
 
 export async function listModels(): Promise<ReadonlyArray<ModelTemplate>> {
   if (USE_MOCK) return mockListModels();
-  const resp = await fetchJson<{ models: ReadonlyArray<BackendModelTemplate> }>('/models');
+  const resp = await fetchJson<{ models: ReadonlyArray<BackendModelTemplate> }>("/models");
   return resp.models.map((m) => ({
     id: m.id,
     name: m.id,
     version: m.version,
     sport_id: m.sport_id,
-    description: typeof m.config_schema?.description === 'string' ? m.config_schema.description : '',
+    description:
+      typeof m.config_schema?.description === "string" ? m.config_schema.description : "",
   }));
 }
 
@@ -253,7 +252,7 @@ export async function getModelSchema(modelId: string): Promise<JsonSchema> {
 
 export async function listApps(): Promise<ReadonlyArray<AppDescriptor>> {
   if (USE_MOCK) return mockListApps();
-  const resp = await fetchJson<{ apps: ReadonlyArray<BackendApp> }>('/apps');
+  const resp = await fetchJson<{ apps: ReadonlyArray<BackendApp> }>("/apps");
   return resp.apps.map((a) => ({
     id: a.id,
     name: a.name ?? a.id,
@@ -268,7 +267,7 @@ export async function submitRun(
 ): Promise<RunSubmitResponse> {
   if (USE_MOCK) return mockSubmitRun(modelId, config, label);
   const resp = await fetchJson<BackendSubmitResponse>(`/models/${modelId}/runs`, {
-    method: 'POST',
+    method: "POST",
     body: JSON.stringify({ config, label }),
   });
   return { run_id: resp.run_id, status: mapStatus(resp.status) };
@@ -282,7 +281,7 @@ export async function getRun(modelId: string, runId: string, label?: string): Pr
     status: mapStatus(resp.status),
     started_at: resp.started_at ?? new Date().toISOString(),
     duration_s: resp.duration_s ?? 0,
-    output_dataset: resp.output_dataset ?? '',
+    output_dataset: resp.output_dataset ?? "",
     row_count: resp.row_count ?? 0,
     label: resp.label ?? undefined,
   };

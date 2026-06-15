@@ -59,6 +59,7 @@ make demo      # docker compose up --build
 ```
 
 Cross-cutting dimensions on every row, every call, every config:
+
 - `tenant_id` — multi-tenant by design (POC = single demo tenant)
 - `sport_id` — sport-pluggable from day one
 

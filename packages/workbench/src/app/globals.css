@@ -6,7 +6,11 @@ html,
 body {
   background-color: #0a0a0a;
   color: #ddd;
-  font-family: 'Inter', -apple-system, system-ui, sans-serif;
+  font-family:
+    "Inter",
+    -apple-system,
+    system-ui,
+    sans-serif;
   font-size: 12.5px;
   -webkit-font-smoothing: antialiased;
 }
@@ -28,7 +32,7 @@ body {
 
 @layer components {
   .mono {
-    font-family: 'SF Mono', Menlo, Monaco, Consolas, monospace;
+    font-family: "SF Mono", Menlo, Monaco, Consolas, monospace;
   }
 
   .label-tag {
@@ -56,13 +60,13 @@ body {
 .rjsf label {
   display: block;
   color: #aaa;
-  font-family: 'SF Mono', Menlo, monospace;
+  font-family: "SF Mono", Menlo, monospace;
   font-size: 11px;
   margin-bottom: 4px;
 }
 
-.rjsf input[type='text'],
-.rjsf input[type='number'],
+.rjsf input[type="text"],
+.rjsf input[type="number"],
 .rjsf select,
 .rjsf textarea {
   background: #141414;
@@ -70,7 +74,7 @@ body {
   color: #ddd;
   padding: 5px 8px;
   border-radius: 4px;
-  font-family: 'SF Mono', Menlo, monospace;
+  font-family: "SF Mono", Menlo, monospace;
   font-size: 11px;
   width: 100%;
 }
@@ -95,7 +99,7 @@ body {
 .rjsf legend {
   font-size: 11px;
   color: #888;
-  font-family: 'SF Mono', Menlo, monospace;
+  font-family: "SF Mono", Menlo, monospace;
 }
 
 .rjsf ul.error-detail {
@@ -125,7 +129,7 @@ body {
   color: #aaa;
 }
 
-.rjsf input[type='checkbox'] {
+.rjsf input[type="checkbox"] {
   accent-color: #5a8;
 }
 

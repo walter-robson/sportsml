@@ -1,4 +1,4 @@
-import type { SynergyMatrix } from '@/lib/types';
+import type { SynergyMatrix } from "@/lib/types";
 
 type Props = {
   synergy: SynergyMatrix;
@@ -7,13 +7,13 @@ type Props = {
 // Map value ∈ [-5, +10] to a discrete bg color. Green for positive, red for negative,
 // dim for near zero. Diagonal cells use a deep blue to indicate self-pair (no synergy).
 function colorFor(value: number, isDiag: boolean): string {
-  if (isDiag) return '#1c2030';
-  if (value >= 8) return '#2c4e3e';
-  if (value >= 5) return '#264438';
-  if (value >= 2) return '#244232';
-  if (value >= -1) return '#1c1c1c';
-  if (value >= -3) return '#3a2828';
-  return '#3a2222';
+  if (isDiag) return "#1c2030";
+  if (value >= 8) return "#2c4e3e";
+  if (value >= 5) return "#264438";
+  if (value >= 2) return "#244232";
+  if (value >= -1) return "#1c1c1c";
+  if (value >= -3) return "#3a2828";
+  return "#3a2222";
 }
 
 export function SynergyHeatmap({ synergy }: Props) {
@@ -26,27 +26,33 @@ export function SynergyHeatmap({ synergy }: Props) {
     <div className="flex flex-col gap-3">
       <div
         className="grid gap-px"
-        style={{ gridTemplateColumns: `120px repeat(${players.length}, minmax(0, 1fr))` }}
+        style={{
+          gridTemplateColumns: `120px repeat(${players.length}, minmax(0, 1fr))`,
+        }}
       >
         <div />
         {players.map((p) => (
-          <div key={`col-${p}`} className="mono text-[9px] text-fg-faint text-center pb-1 uppercase tracking-wide">
+          <div
+            key={`col-${p}`}
+            className="mono text-[9px] text-fg-faint text-center pb-1 uppercase tracking-wide"
+          >
             {p.slice(0, 4)}
           </div>
         ))}
         {players.map((rowP) => (
-          <Row
-            key={`row-${rowP}`}
-            rowP={rowP}
-            players={players}
-            grid={grid}
-          />
+          <Row key={`row-${rowP}`} rowP={rowP} players={players} grid={grid} />
         ))}
       </div>
       <div className="flex gap-4 text-[10px] text-fg-faint mono">
-        <span><Swatch color="#3a2222" /> −5</span>
-        <span><Swatch color="#1c1c1c" /> 0</span>
-        <span><Swatch color="#2c4e3e" /> +10</span>
+        <span>
+          <Swatch color="#3a2222" /> −5
+        </span>
+        <span>
+          <Swatch color="#1c1c1c" /> 0
+        </span>
+        <span>
+          <Swatch color="#2c4e3e" /> +10
+        </span>
       </div>
     </div>
   );
@@ -85,6 +91,9 @@ function Row({
 
 function Swatch({ color }: { color: string }) {
   return (
-    <span className="inline-block w-2 h-2 rounded-sm align-middle mr-1.5" style={{ background: color }} />
+    <span
+      className="inline-block w-2 h-2 rounded-sm align-middle mr-1.5"
+      style={{ background: color }}
+    />
   );
 }

@@ -1,6 +1,6 @@
-import * as React from 'react';
-import { Sidebar } from './sidebar';
-import { Topbar } from './topbar';
+import * as React from "react";
+import { Sidebar } from "./sidebar";
+import { Topbar } from "./topbar";
 
 type Props = {
   children: React.ReactNode;
