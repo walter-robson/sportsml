@@ -1,5 +1,5 @@
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { apiConfig } from '@/lib/api';
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { apiConfig } from "@/lib/api";
 
 export default function AdminPage() {
   return (
@@ -12,12 +12,12 @@ export default function AdminPage() {
         <CardContent>
           <div className="mono text-[11px] flex flex-col gap-1">
             <div>
-              <span className="text-fg-faint">url:</span>{' '}
+              <span className="text-fg-faint">url:</span>{" "}
               <span className="text-accent-blue">{apiConfig.url}</span>
             </div>
             <div>
-              <span className="text-fg-faint">mode:</span>{' '}
-              <span className="text-accent-magenta">{apiConfig.useMock ? 'mock' : 'live'}</span>
+              <span className="text-fg-faint">mode:</span>{" "}
+              <span className="text-accent-magenta">{apiConfig.useMock ? "mock" : "live"}</span>
             </div>
           </div>
         </CardContent>

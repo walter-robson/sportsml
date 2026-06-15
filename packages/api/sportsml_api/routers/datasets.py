@@ -20,12 +20,14 @@ def _scan_datasets(data_dir: Path) -> list[dict[str, object]]:
         return out
     for p in sorted(data_dir.rglob("*.parquet")):
         rel = p.relative_to(data_dir)
-        out.append({
-            "id": str(rel),
-            "path": str(p),
-            "size_bytes": p.stat().st_size,
-            "name": p.stem,
-        })
+        out.append(
+            {
+                "id": str(rel),
+                "path": str(p),
+                "size_bytes": p.stat().st_size,
+                "name": p.stem,
+            }
+        )
     return out
 
 

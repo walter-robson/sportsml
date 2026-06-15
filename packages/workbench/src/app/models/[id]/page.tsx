@@ -1,7 +1,7 @@
-import { getModelSchema, listModels } from '@/lib/api';
-import { notFound } from 'next/navigation';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { getModelSchema, listModels } from "@/lib/api";
+import { notFound } from "next/navigation";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 type Props = { params: { id: string } };
 
@@ -35,10 +35,16 @@ export default async function ModelDetailPage({ params }: Props) {
                   <div className="mono text-[10.5px] text-accent-blue">
                     {field.type}
                     {field.minimum !== undefined && field.maximum !== undefined && (
-                      <span className="text-fg-faint"> · [{field.minimum} … {field.maximum}]</span>
+                      <span className="text-fg-faint">
+                        {" "}
+                        · [{field.minimum} … {field.maximum}]
+                      </span>
                     )}
                     {field.default !== undefined && (
-                      <span className="text-fg-faint"> · default {JSON.stringify(field.default)}</span>
+                      <span className="text-fg-faint">
+                        {" "}
+                        · default {JSON.stringify(field.default)}
+                      </span>
                     )}
                   </div>
                   {field.description && (

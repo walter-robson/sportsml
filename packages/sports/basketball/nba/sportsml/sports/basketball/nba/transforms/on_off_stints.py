@@ -33,9 +33,15 @@ def build_on_off_stints(stints: "pd.DataFrame") -> "pd.DataFrame":
     if stints is None or stints.empty:
         return pd.DataFrame(
             columns=[
-                "stint_id", "game_id", "off_team_id", "def_team_id",
-                "off_player_ids", "def_player_ids",
-                "possessions", "points_for", "points_against",
+                "stint_id",
+                "game_id",
+                "off_team_id",
+                "def_team_id",
+                "off_player_ids",
+                "def_player_ids",
+                "possessions",
+                "points_for",
+                "points_against",
                 "point_margin_per_100",
             ]
         )
@@ -56,18 +62,20 @@ def build_on_off_stints(stints: "pd.DataFrame") -> "pd.DataFrame":
                 continue
             pf = int(off["points_for"])
             pa = int(off["points_against"])
-            rows.append({
-                "stint_id": f"{game_id}_{i}",
-                "game_id": game_id,
-                "off_team_id": off["team_id"],
-                "def_team_id": deff["team_id"],
-                "off_player_ids": list(off["player_ids"]),
-                "def_player_ids": list(deff["player_ids"]),
-                "possessions": poss,
-                "points_for": pf,
-                "points_against": pa,
-                "point_margin_per_100": (pf - pa) / poss * 100.0,
-            })
+            rows.append(
+                {
+                    "stint_id": f"{game_id}_{i}",
+                    "game_id": game_id,
+                    "off_team_id": off["team_id"],
+                    "def_team_id": deff["team_id"],
+                    "off_player_ids": list(off["player_ids"]),
+                    "def_player_ids": list(deff["player_ids"]),
+                    "possessions": poss,
+                    "points_for": pf,
+                    "points_against": pa,
+                    "point_margin_per_100": (pf - pa) / poss * 100.0,
+                }
+            )
     return pd.DataFrame(rows)
 
 
@@ -77,6 +85,8 @@ def build_on_off_stints(stints: "pd.DataFrame") -> "pd.DataFrame":
     compute_kind="duckdb",
     deps=[nba_lineup_stints],
 )
-def nba_on_off_stints(context: AssetExecutionContext, nba_lineup_stints: "pd.DataFrame") -> Output[pd.DataFrame]:  # noqa: ARG001
+def nba_on_off_stints(
+    context: AssetExecutionContext, nba_lineup_stints: "pd.DataFrame"
+) -> Output[pd.DataFrame]:  # noqa: ARG001
     df = build_on_off_stints(nba_lineup_stints)
     return Output(df, metadata={"rows": len(df)})

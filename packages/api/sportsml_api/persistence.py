@@ -131,9 +131,7 @@ def update_run(run: ModelRun) -> None:
 
 def get_run(run_id: str) -> ModelRun | None:
     with connection() as c:
-        row = c.execute(
-            "SELECT * FROM model_runs WHERE run_id = ?", (run_id,)
-        ).fetchone()
+        row = c.execute("SELECT * FROM model_runs WHERE run_id = ?", (run_id,)).fetchone()
     return _deserialize(row) if row else None
 
 

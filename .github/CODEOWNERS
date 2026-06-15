@@ -1,0 +1,9 @@
+# Default owner — all PRs require their review
+*       @walter-robson
+
+# Area-specific owners can be added below as the team grows.
+# /packages/api/          @walter-robson
+# /packages/workbench/    @walter-robson
+# /packages/sports/       @walter-robson
+# /dagster_project/       @walter-robson
+# /docker/                @walter-robson

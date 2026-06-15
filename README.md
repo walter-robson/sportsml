@@ -1,5 +1,9 @@
 # sportsml
 
+[![CI](https://github.com/walter-robson/sportsml/actions/workflows/ci.yml/badge.svg)](https://github.com/walter-robson/sportsml/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/walter-robson/sportsml/actions/workflows/codeql.yml/badge.svg)](https://github.com/walter-robson/sportsml/actions/workflows/codeql.yml)
+[![codecov](https://codecov.io/gh/walter-robson/sportsml/branch/main/graph/badge.svg)](https://codecov.io/gh/walter-robson/sportsml)
+
 > Foundry-style data platform for sports analytics. NBA-first, sport-agnostic architecture.
 
 A platform — not a service — that gives sports organizations a typed data ontology, declarative transforms, tunable model templates, and an operational workbench. Teams bring their own IP (configs, philosophies, custom models); the platform provides the rails.
@@ -55,6 +59,7 @@ make demo      # docker compose up --build
 ```
 
 Cross-cutting dimensions on every row, every call, every config:
+
 - `tenant_id` — multi-tenant by design (POC = single demo tenant)
 - `sport_id` — sport-pluggable from day one
 
@@ -80,10 +85,30 @@ sportsml/
 ## Development
 
 ```bash
-make test         # pytest
-make lint         # ruff
-make dagster      # open Dagit on :3001 for pipeline debugging
+make test                 # pytest
+make test-cov             # pytest with coverage report
+make lint                 # ruff lint + format check
+make format               # auto-format
+make typecheck            # mypy
+make dagster              # open Dagit on :3001 for pipeline debugging
+
+# One-time hook setup (recommended for contributors)
+make precommit-install    # installs pre-commit git hooks
+make precommit            # run all hooks against the full tree
 ```
+
+### CI
+
+Every PR runs (see `.github/workflows/ci.yml`):
+
+- `ruff check` + `ruff format --check`
+- `mypy` on `packages/core` and `packages/api`
+- `pytest` with coverage; patch coverage gated at 80% via `diff-cover`
+- `next lint`, `tsc --noEmit`, and `next build` for `packages/workbench`
+- All pre-commit hooks (`gitleaks`, file hygiene, etc.)
+- CodeQL security scanning (Python + TypeScript)
+
+Coverage reports are uploaded to Codecov (set `CODECOV_TOKEN` repo secret to enable).
 
 ## Status
 

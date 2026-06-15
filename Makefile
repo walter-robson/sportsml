@@ -1,4 +1,4 @@
-.PHONY: help install api dagster workbench demo ingest seed test lint clean
+.PHONY: help install api dagster workbench demo ingest seed test test-cov lint format typecheck precommit-install precommit clean
 
 PY ?= python3.12
 PIP ?= $(PY) -m pip
@@ -13,7 +13,12 @@ help:
 	@echo "  make workbench     run Next.js dev server on :3000"
 	@echo "  make demo          ingest + start all services (foreground via docker compose)"
 	@echo "  make test          run pytest"
-	@echo "  make lint          run ruff"
+	@echo "  make test-cov      run pytest with coverage report"
+	@echo "  make lint          run ruff lint + format check"
+	@echo "  make format        auto-format with ruff"
+	@echo "  make typecheck     run mypy"
+	@echo "  make precommit-install   install pre-commit git hooks"
+	@echo "  make precommit     run pre-commit on all files"
 
 install:
 	$(PY) -m venv .venv || true
@@ -45,8 +50,23 @@ demo:
 test:
 	. .venv/bin/activate && pytest -q
 
+test-cov:
+	. .venv/bin/activate && pytest --cov --cov-report=term-missing --cov-report=html
+
 lint:
 	. .venv/bin/activate && ruff check . && ruff format --check .
+
+format:
+	. .venv/bin/activate && ruff check . --fix && ruff format .
+
+typecheck:
+	. .venv/bin/activate && mypy packages/core/sportsml packages/api/sportsml_api
+
+precommit-install:
+	. .venv/bin/activate && pip install pre-commit && pre-commit install
+
+precommit:
+	. .venv/bin/activate && pre-commit run --all-files
 
 clean:
 	rm -rf .venv data/*.parquet data/sportsml.duckdb .dagster_home

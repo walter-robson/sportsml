@@ -65,9 +65,7 @@ def get_instance(
             [instance_id],
         ).df()
     except Exception as e:  # noqa: BLE001 — DuckDB raises generic on missing tables
-        raise HTTPException(
-            status_code=404, detail=f"Could not resolve {type_name!r}: {e}"
-        ) from e
+        raise HTTPException(status_code=404, detail=f"Could not resolve {type_name!r}: {e}") from e
     if df.empty:
         raise HTTPException(status_code=404, detail=f"No instance with id {instance_id!r}.")
     return {"type": type_name, "instance": df.iloc[0].to_dict()}

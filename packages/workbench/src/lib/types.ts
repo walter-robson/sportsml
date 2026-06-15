@@ -1,6 +1,6 @@
 // Shared TypeScript types mirroring the FastAPI service contract (spec section 2.2).
 
-export type HealthStatus = { status: 'ok' };
+export type HealthStatus = { status: "ok" };
 
 export type ObjectType = {
   id: string;
@@ -28,7 +28,7 @@ export type ModelTemplate = {
 // schema; we render whatever shape it returns.
 export type JsonSchema = {
   $schema?: string;
-  type: 'object';
+  type: "object";
   title?: string;
   description?: string;
   properties: Record<string, JsonSchemaField>;
@@ -36,7 +36,7 @@ export type JsonSchema = {
 };
 
 export type JsonSchemaField = {
-  type: 'string' | 'number' | 'integer' | 'boolean' | 'array';
+  type: "string" | "number" | "integer" | "boolean" | "array";
   title?: string;
   description?: string;
   default?: unknown;
@@ -44,11 +44,11 @@ export type JsonSchemaField = {
   maximum?: number;
   multipleOf?: number;
   enum?: ReadonlyArray<string | number>;
-  items?: { type: 'string' | 'number'; enum?: ReadonlyArray<string | number> };
+  items?: { type: "string" | "number"; enum?: ReadonlyArray<string | number> };
   uniqueItems?: boolean;
 };
 
-export type RunStatus = 'queued' | 'running' | 'success' | 'failed';
+export type RunStatus = "queued" | "running" | "success" | "failed";
 
 export type RunSubmitResponse = {
   run_id: string;

@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import * as React from 'react';
-import * as SwitchPrimitive from '@radix-ui/react-switch';
-import { cn } from '@/lib/utils';
+import * as React from "react";
+import * as SwitchPrimitive from "@radix-ui/react-switch";
+import { cn } from "@/lib/utils";
 
 export const Switch = React.forwardRef<
   React.ElementRef<typeof SwitchPrimitive.Root>,
@@ -12,7 +12,7 @@ export const Switch = React.forwardRef<
     <SwitchPrimitive.Root
       ref={ref}
       className={cn(
-        'peer inline-flex h-[14px] w-[26px] shrink-0 cursor-pointer items-center rounded-full border border-transparent transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent-blue disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-accent-green data-[state=unchecked]:bg-[#2a2a2a]',
+        "peer inline-flex h-[14px] w-[26px] shrink-0 cursor-pointer items-center rounded-full border border-transparent transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent-blue disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-accent-green data-[state=unchecked]:bg-[#2a2a2a]",
         className,
       )}
       {...props}

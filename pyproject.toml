@@ -72,3 +72,46 @@ ignore = ["E501"]
 testpaths = ["packages/core/tests", "packages/api/tests", "packages/sports"]
 pythonpath = ["packages/core", "packages/api", "packages/sports/basketball/nba", "packages/sports/basketball/ncaa", "dagster_project"]
 asyncio_mode = "auto"
+addopts = "-ra --strict-markers"
+
+[tool.coverage.run]
+branch = true
+source = [
+  "packages/core/sportsml",
+  "packages/api/sportsml_api",
+  "packages/sports",
+]
+omit = [
+  "*/tests/*",
+  "*/__init__.py",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+  "pragma: no cover",
+  "raise NotImplementedError",
+  "if TYPE_CHECKING:",
+  "if __name__ == .__main__.:",
+]
+show_missing = true
+skip_covered = false
+
+[tool.mypy]
+python_version = "3.12"
+strict = false
+warn_unused_ignores = true
+warn_redundant_casts = true
+warn_unreachable = true
+no_implicit_optional = true
+check_untyped_defs = true
+ignore_missing_imports = true
+exclude = [
+  "\\.venv",
+  "build",
+  "dist",
+  "data",
+]
+
+[[tool.mypy.overrides]]
+module = ["tests.*"]
+ignore_errors = true

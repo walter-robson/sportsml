@@ -80,20 +80,22 @@ def _close_stint(
     if team_id not in state.open_stints:
         return
     s = state.open_stints.pop(team_id)
-    state.closed_stints.append({
-        "id": f"{game_id}_{team_id}_{len(state.closed_stints)}",
-        "game_id": game_id,
-        "team_id": s.team_id,
-        "lineup_id": s.lineup_id,
-        "player_ids": list(s.player_ids),
-        "start_period": s.start_period,
-        "start_clock_s": s.start_clock_s,
-        "end_period": period,
-        "end_clock_s": clock_s,
-        "possessions_played": s.possessions,
-        "points_for": s.points_for,
-        "points_against": s.points_against,
-    })
+    state.closed_stints.append(
+        {
+            "id": f"{game_id}_{team_id}_{len(state.closed_stints)}",
+            "game_id": game_id,
+            "team_id": s.team_id,
+            "lineup_id": s.lineup_id,
+            "player_ids": list(s.player_ids),
+            "start_period": s.start_period,
+            "start_clock_s": s.start_clock_s,
+            "end_period": period,
+            "end_clock_s": clock_s,
+            "possessions_played": s.possessions,
+            "points_for": s.points_for,
+            "points_against": s.points_against,
+        }
+    )
 
 
 def build_lineup_stints(
@@ -115,16 +117,24 @@ def build_lineup_stints(
         _open_stint(state, tid, period=1, clock_s=12 * 60.0)
 
     sub_rows = (
-        substitutions[substitutions["game_id"] == game_id]
-        .sort_values(["period", "game_clock_s"], ascending=[True, False])
-        .to_dict("records")
-    ) if not substitutions.empty else []
+        (
+            substitutions[substitutions["game_id"] == game_id]
+            .sort_values(["period", "game_clock_s"], ascending=[True, False])
+            .to_dict("records")
+        )
+        if not substitutions.empty
+        else []
+    )
 
     poss_rows = (
-        possessions[possessions["game_id"] == game_id]
-        .sort_values(["possession_num"])
-        .to_dict("records")
-    ) if not possessions.empty else []
+        (
+            possessions[possessions["game_id"] == game_id]
+            .sort_values(["possession_num"])
+            .to_dict("records")
+        )
+        if not possessions.empty
+        else []
+    )
 
     # Interleave possession crediting and sub events by (period, -clock_s) order.
     # Possessions are credited to the stint open at the moment the possession ends.
@@ -134,9 +144,13 @@ def build_lineup_stints(
     for p in poss_rows:
         # Use period and end clock; v0 doesn't track end-clock-s precisely, so we
         # synthesize a stable monotone key from period + possession_num.
-        events.append((
-            (int(p["period"]), float(p["possession_num"])), "poss", p,
-        ))
+        events.append(
+            (
+                (int(p["period"]), float(p["possession_num"])),
+                "poss",
+                p,
+            )
+        )
     events.sort(key=lambda e: e[0])
 
     for (period, _), kind, ev in events:
@@ -165,9 +179,18 @@ def build_lineup_stints(
         _close_stint(state, tid, period=4, clock_s=0.0, game_id=game_id)
 
     cols = [
-        "id", "game_id", "team_id", "lineup_id", "player_ids",
-        "start_period", "start_clock_s", "end_period", "end_clock_s",
-        "possessions_played", "points_for", "points_against",
+        "id",
+        "game_id",
+        "team_id",
+        "lineup_id",
+        "player_ids",
+        "start_period",
+        "start_clock_s",
+        "end_period",
+        "end_clock_s",
+        "possessions_played",
+        "points_for",
+        "points_against",
     ]
     return pd.DataFrame(state.closed_stints, columns=cols)
 
@@ -209,7 +232,9 @@ def nba_lineup_stints(context: AssetExecutionContext) -> Output[pd.DataFrame]:
             continue
         starters = {
             str(t): gbx_starters[gbx_starters["TEAM_ID"].astype(str) == str(t)]
-                .head(5)["PLAYER_ID"].astype(str).tolist()
+            .head(5)["PLAYER_ID"]
+            .astype(str)
+            .tolist()
             for t in teams
         }
         if any(len(v) != 5 for v in starters.values()):

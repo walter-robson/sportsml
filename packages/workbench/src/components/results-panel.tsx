@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { LineupsTable } from '@/components/lineups-table';
-import { SynergyHeatmap } from '@/components/synergy-heatmap';
-import { ProjectionChart } from '@/components/projection-chart';
-import type { RunOutput } from '@/lib/types';
-import { cn } from '@/lib/utils';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { LineupsTable } from "@/components/lineups-table";
+import { SynergyHeatmap } from "@/components/synergy-heatmap";
+import { ProjectionChart } from "@/components/projection-chart";
+import type { RunOutput } from "@/lib/types";
+import { cn } from "@/lib/utils";
 
 type Props = {
   output: RunOutput;
@@ -14,7 +14,7 @@ type Props = {
 
 export function ResultsPanel({ output, loading }: Props) {
   return (
-    <div className={cn('relative transition-opacity', loading && 'opacity-60')}>
+    <div className={cn("relative transition-opacity", loading && "opacity-60")}>
       {loading && (
         <div className="absolute right-0 top-0 mono text-[10px] text-accent-blue uppercase tracking-widerlabel">
           Running…

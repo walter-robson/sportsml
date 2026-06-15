@@ -1,7 +1,7 @@
-import { listOntologyTypes } from '@/lib/api';
-import { Table, THead, TBody, TR, TH, TD } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import { formatNumber } from '@/lib/utils';
+import { listOntologyTypes } from "@/lib/api";
+import { Table, THead, TBody, TR, TH, TD } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { formatNumber } from "@/lib/utils";
 
 export default async function OntologyPage() {
   const types = await listOntologyTypes();
