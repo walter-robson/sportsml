@@ -31,6 +31,10 @@ dependencies = [
   # API
   "fastapi>=0.111",
   "uvicorn[standard]>=0.30",
+  # Persistence (run store / tenant state)
+  "sqlalchemy>=2.0",
+  "psycopg[binary]>=3.1",
+  "alembic>=1.13",
 ]
 
 [project.optional-dependencies]
@@ -41,6 +45,7 @@ dev = [
   "ruff>=0.5",
   "mypy>=1.10",
   "pytest-recording>=0.13",
+  "diff-cover>=9.0",
 ]
 
 [build-system]

@@ -16,17 +16,25 @@ from fastapi.testclient import TestClient
 
 @pytest.fixture
 def client():
-    """Build a TestClient with an isolated temp data dir + duckdb."""
+    """Build a TestClient with an isolated temp data dir + DuckDB + in-memory Postgres-shaped store."""
     with TemporaryDirectory() as tmp:
         os.environ["SPORTSML_DATA_DIR"] = tmp
         os.environ["SPORTSML_DUCKDB_PATH"] = str(Path(tmp) / "test.duckdb")
         os.environ["SPORTSML_TENANT_ID"] = "demo"
-        # Import inside fixture so env vars apply before the app builds settings.
+        # Use a SQLite in-memory DB for the run store so the suite is hermetic
+        # and does not require a Postgres service. The ORM models are dialect-
+        # portable via Uuid + JSON variants.
+        os.environ["SPORTSML_DATABASE_URL"] = "sqlite:///:memory:"
+        # Reset the global engine so the env var takes effect for this app instance.
+        from sportsml_api.db.engine import dispose_engine
+
+        dispose_engine()
         from sportsml_api.main import create_app
 
         app = create_app()
         with TestClient(app) as c:
             yield c
+        dispose_engine()
 
 
 def test_health(client):

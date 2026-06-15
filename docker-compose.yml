@@ -1,4 +1,22 @@
 services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: sportsml-postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: sportsml
+      POSTGRES_PASSWORD: sportsml
+      POSTGRES_DB: sportsml
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sportsml -d sportsml"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
   api:
     build:
       context: .
@@ -11,8 +29,12 @@ services:
       SPORTSML_DUCKDB_PATH: /app/data/sportsml.duckdb
       SPORTSML_TENANT_ID: demo
       SPORTSML_DEFAULT_SPORT: basketball.nba
+      SPORTSML_DATABASE_URL: postgresql+psycopg://sportsml:sportsml@postgres:5432/sportsml
     volumes:
       - ./data:/app/data
+    depends_on:
+      postgres:
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 10s
@@ -45,3 +67,6 @@ services:
     volumes:
       - ./data:/app/data
       - ./.dagster_home:/app/.dagster_home
+
+volumes:
+  postgres_data:
