@@ -27,7 +27,7 @@ dependencies = [
   "dagster>=1.7",
   "dagster-webserver>=1.7",
   "dagster-duckdb>=0.23",
-  "dagster-duckdb-polars>=0.23",
+  "dagster-duckdb-polars>=0.29.9",
   # API
   "fastapi>=0.111",
   "uvicorn[standard]>=0.30",
