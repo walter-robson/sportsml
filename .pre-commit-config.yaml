@@ -36,6 +36,7 @@ repos:
           - types-requests
         args: [--ignore-missing-imports]
         files: ^packages/(core|api)/.*\.py$
+        exclude: ^packages/api/alembic/.*$
 
   - repo: https://github.com/gitleaks/gitleaks
     rev: v8.18.4
