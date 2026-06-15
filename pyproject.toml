@@ -25,7 +25,7 @@ dependencies = [
   "tenacity>=8.3",
   # Orchestration
   "dagster>=1.7",
-  "dagster-webserver>=1.7",
+  "dagster-webserver>=1.13.9",
   "dagster-duckdb>=0.23",
   "dagster-duckdb-polars>=0.23",
   # API
