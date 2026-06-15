@@ -24,6 +24,8 @@ See [`docs/superpowers/specs/2026-05-22-sportsml-platform-design.md`](docs/super
 ```bash
 cp .env.example .env
 make install                            # venv + node deps
+make db-up                              # local Postgres via docker compose
+make db-migrate                         # apply alembic migrations
 python scripts/seed_synthetic_data.py   # synthetic on_off_stints (instant, no network)
 make api &                              # FastAPI on :8000
 make workbench                          # Next.js on :3000
@@ -54,7 +56,7 @@ make demo      # docker compose up --build
 [2] Platform API    FastAPI
 [3] Core            sportsml.core — ontology, models, apps ABCs
 [4] Sport plugins   sportsml.sports.basketball.nba (+ stubs)
-[5] Storage         DuckDB (analytics) + Parquet on disk
+[5] Storage         DuckDB (analytics) + Parquet on disk; Postgres (run store / tenants)
 [6] Ingestion       Dagster — nba_api source assets
 ```
 
@@ -92,10 +94,25 @@ make format               # auto-format
 make typecheck            # mypy
 make dagster              # open Dagit on :3001 for pipeline debugging
 
+# Database (Postgres)
+make db-up                # start local Postgres via docker compose
+make db-migrate           # apply alembic migrations to current DATABASE_URL
+make db-revision msg="add foo table"   # autogenerate a new alembic revision
+make db-down              # stop local Postgres
+
 # One-time hook setup (recommended for contributors)
 make precommit-install    # installs pre-commit git hooks
 make precommit            # run all hooks against the full tree
 ```
+
+### Run store / tenants (Postgres + Supabase)
+
+Run metadata, tenants, and model outputs live in Postgres. Locally this is a
+docker-compose service; in production it is Supabase (use the Supabase
+transaction pooler URL in `SPORTSML_DATABASE_URL`). The unit test suite uses
+SQLite in-memory via dialect-portable SQLAlchemy types so no Postgres is
+required to run `pytest`. Schema evolution flows through Alembic — see
+`packages/api/alembic/versions/` and run `make db-migrate` after pulling.
 
 ### CI
 

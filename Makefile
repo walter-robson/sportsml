@@ -1,4 +1,4 @@
-.PHONY: help install api dagster workbench demo ingest seed test test-cov lint format typecheck precommit-install precommit clean
+.PHONY: help install api dagster workbench demo ingest seed test test-cov lint format typecheck precommit-install precommit db-up db-down db-migrate db-revision clean
 
 PY ?= python3.12
 PIP ?= $(PY) -m pip
@@ -19,6 +19,10 @@ help:
 	@echo "  make typecheck     run mypy"
 	@echo "  make precommit-install   install pre-commit git hooks"
 	@echo "  make precommit     run pre-commit on all files"
+	@echo "  make db-up         start local Postgres via docker compose"
+	@echo "  make db-down       stop local Postgres"
+	@echo "  make db-migrate    apply alembic migrations to current DATABASE_URL"
+	@echo "  make db-revision msg=\"...\"   autogenerate a new alembic revision"
 
 install:
 	$(PY) -m venv .venv || true
@@ -67,6 +71,18 @@ precommit-install:
 
 precommit:
 	. .venv/bin/activate && pre-commit run --all-files
+
+db-up:
+	docker compose up -d postgres
+
+db-down:
+	docker compose stop postgres
+
+db-migrate:
+	. .venv/bin/activate && alembic upgrade head
+
+db-revision:
+	. .venv/bin/activate && alembic revision --autogenerate -m "$(msg)"
 
 clean:
 	rm -rf .venv data/*.parquet data/sportsml.duckdb .dagster_home

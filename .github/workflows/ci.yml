@@ -150,3 +150,40 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: pip
       - uses: pre-commit/action@v3.0.1
+
+  alembic-postgres:
+    name: Alembic · upgrade head against Postgres
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: sportsml
+          POSTGRES_PASSWORD: sportsml
+          POSTGRES_DB: sportsml
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U sportsml"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+    env:
+      SPORTSML_DATABASE_URL: postgresql+psycopg://sportsml:sportsml@localhost:5432/sportsml
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+          python scripts/install_dev_paths.py
+      - name: Run migrations
+        run: alembic upgrade head
+      - name: Verify schema by running migrations down + up
+        run: |
+          alembic downgrade base
+          alembic upgrade head
