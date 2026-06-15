@@ -1,4 +1,4 @@
-FROM node:20-alpine AS deps
+FROM node:26-alpine AS deps
 WORKDIR /app
 COPY packages/workbench/package.json packages/workbench/pnpm-lock.yaml* packages/workbench/package-lock.json* ./
 RUN if [ -f pnpm-lock.yaml ]; then \
@@ -9,7 +9,7 @@ RUN if [ -f pnpm-lock.yaml ]; then \
       npm install; \
     fi
 
-FROM node:20-alpine AS runner
+FROM node:26-alpine AS runner
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY packages/workbench ./
